@@ -404,10 +404,12 @@ namespace morpher
         if (auto* instance = processor.getInstance (slot))
         {
             const auto title = processor.getPluginName (slot) + " (" + cornerName (slot) + ")";
-            windows[(size_t) slot] = std::make_unique<PluginWindow> (*instance, title, [this, slot]
+            const SafePointer<MorpherEditor> safe (this);
+
+            windows[(size_t) slot] = std::make_unique<PluginWindow> (*instance, title, [safe, slot]
             {
                 // Closed from its own title bar: let go once its click has finished.
-                MessageManager::callAsync ([safe = SafePointer<MorpherEditor> (this), slot]
+                MessageManager::callAsync ([safe, slot]
                 {
                     if (safe != nullptr)
                         safe->closeWindow (slot);

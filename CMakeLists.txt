@@ -23,12 +23,7 @@ FetchContent_Declare(clap_juce_extensions
     GIT_TAG        7adee3a1bd4684d4caa5601100e364abccff4b4d
     GIT_SUBMODULES_RECURSE TRUE)
 
-FetchContent_MakeAvailable(juce)
-FetchContent_GetProperties(clap_juce_extensions)
-if(NOT clap_juce_extensions_POPULATED)
-    FetchContent_Populate(clap_juce_extensions)
-    add_subdirectory(${clap_juce_extensions_SOURCE_DIR} ${clap_juce_extensions_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+FetchContent_MakeAvailable(juce clap_juce_extensions)
 
 set(MORPHER_FORMATS VST3)
 if(APPLE)

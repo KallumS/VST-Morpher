@@ -3,6 +3,17 @@
 
 void writeScreenshots (const juce::File& folder);
 
+/** Prints to the console on every system; JUCE's default goes to the
+    debugger on Windows, where CI can't see it. */
+struct ConsoleRunner final : juce::UnitTestRunner
+{
+    void logMessage (const juce::String& message) override
+    {
+        std::fputs ((message + "\n").toRawUTF8(), stdout);
+        std::fflush (stdout);
+    }
+};
+
 int main (int argc, char** argv)
 {
     juce::ScopedJuceInitialiser_GUI gui;
@@ -17,7 +28,7 @@ int main (int argc, char** argv)
     const auto settingsFile = juce::File::createTempFile (".settings");
     morpher::Settings::useFileForTesting (settingsFile);
 
-    juce::UnitTestRunner runner;
+    ConsoleRunner runner;
     runner.setAssertOnFailure (false);
     runner.runAllTests();
 

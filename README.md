@@ -36,10 +36,13 @@ their settings ([why](docs/decisions/0003-the-morph-mixes-sound-not-settings.md)
 
 ## Download
 
-Each push builds Morpher for macOS (Apple silicon and Intel), Windows and
-Linux: see the **Build and test** workflow's artifacts on GitHub. The Mac
-build isn't signed or notarised; if macOS refuses it, run
-`xattr -dr com.apple.quarantine` on the plug-in.
+Each push builds and tests Morpher for Windows and Linux, and validates it
+with pluginval: download the plug-ins from the **Build and test** run's
+artifacts on GitHub. The workflow has a macOS job too (Apple silicon and
+Intel), but GitHub has been cancelling it before it starts, which usually
+means macOS runners aren't available to the account; until then, build it on
+a Mac (below). A Mac build isn't signed or notarised; if macOS refuses it,
+run `xattr -dr com.apple.quarantine` on the plug-in.
 
 Put `Morpher.vst3` in your VST3 folder, `Morpher.clap` in your CLAP folder,
 and on a Mac `Morpher.component` in `~/Library/Audio/Plug-Ins/Components`.

@@ -69,9 +69,10 @@ layout and immersive experiences: the window has none of these.
 
 ## Unverified in a DAW
 
-Morpher was built and its tests run on Linux, without a screen, here; the
-Mac and Windows builds run the same tests and pluginval in CI. Only a DAW can
-confirm:
+Morpher was built and its tests run on Linux, without a screen, here; in CI
+the Windows and Linux builds pass the same tests and pluginval at strictness
+10. The macOS job hasn't run yet (GitHub cancels it before it starts), so
+nothing has been tested on a Mac. Only a DAW can confirm:
 
 - that VoiceOver and Narrator read the names as intended;
 - that Tab, the arrow keys, Esc and Cmd+=, Cmd+- and Cmd+0 reach the window
@@ -204,7 +205,7 @@ moved to the bottom; corner A's weight wrong; buttons that never wrap.
 | DP-12 | Design for everyone; accessibility from the start | met | See "Already met" |
 | DP-13 | Preserve context | met | Each panel sits by its corner; the pad shows every corner's share |
 | DP-14 | Support many input methods | met | See "Already met" |
-| DP-15 | Equal care on every platform supported | not possible | Built and tested on Linux here; the Mac and Windows builds run the same tests in CI, but it hasn't yet been used in a DAW on either |
+| DP-15 | Equal care on every platform supported | not possible | Tested on Linux and Windows (CI, with pluginval); not yet on a Mac, and not yet used in a DAW |
 | DP-16 | Include only what's needed; let secondary items recede | met | See "Already met" |
 | DP-17 | Be concise in labels and copy | met | See "Already met" |
 | DP-18 | Clear hierarchy: people know where they are and what's next | met | See "Already met" |

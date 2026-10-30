@@ -1,0 +1,88 @@
+name: Build and test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            os: macos-14
+            pluginval: pluginval_macOS.zip
+            pluginval_exe: pluginval.app/Contents/MacOS/pluginval
+            extra: -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64
+            targets: Morpher_VST3 Morpher_CLAP Morpher_AU MorpherTests
+          - name: Windows
+            os: windows-2022
+            pluginval: pluginval_Windows.zip
+            pluginval_exe: pluginval.exe
+            extra: ""
+            targets: Morpher_VST3 Morpher_CLAP MorpherTests
+          - name: Linux
+            os: ubuntu-24.04
+            pluginval: pluginval_Linux.zip
+            pluginval_exe: pluginval
+            extra: ""
+            targets: Morpher_VST3 Morpher_CLAP MorpherTests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux packages
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libasound2-dev libjack-jackd2-dev ladspa-sdk \
+            libcurl4-openssl-dev libfreetype-dev libfontconfig1-dev libx11-dev libxcomposite-dev \
+            libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libxi-dev \
+            libgl-dev xvfb openbox
+
+      - name: Configure
+        shell: bash
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release "${{ matrix.extra }}"
+
+      - name: Build
+        shell: bash
+        run: cmake --build build --config Release --parallel 4 --target ${{ matrix.targets }}
+
+      - name: Test
+        shell: bash
+        run: |
+          exe=$(find build/tests -type f \( -name MorpherTests -o -name MorpherTests.exe \) | head -n 1)
+          echo "Running $exe"
+          if [ "$RUNNER_OS" = "Linux" ]; then tests/run-headless.sh "$exe"; else "$exe"; fi
+
+      - name: Validate with pluginval
+        shell: bash
+        run: |
+          curl -sSL -o pluginval.zip "https://github.com/Tracktion/pluginval/releases/latest/download/${{ matrix.pluginval }}"
+          unzip -q pluginval.zip -d pluginval
+          vst3=$(find build/Morpher_artefacts -type d -name 'Morpher.vst3' | head -n 1)
+          cmd="pluginval/${{ matrix.pluginval_exe }} --strictness-level 10 --validate-in-process --validate $vst3"
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            xvfb-run -a -s "-screen 0 1920x1080x24" bash -c "openbox >/dev/null 2>&1 & sleep 1; $cmd"
+          else
+            $cmd
+          fi
+
+      - name: Collect plug-ins
+        shell: bash
+        run: |
+          mkdir -p dist
+          for f in Morpher.vst3 Morpher.clap Morpher.component; do
+            found=$(find build/Morpher_artefacts -name "$f" -maxdepth 3 | head -n 1)
+            [ -n "$found" ] && cp -R "$found" dist/
+          done
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Morpher-${{ matrix.name }}
+          path: dist

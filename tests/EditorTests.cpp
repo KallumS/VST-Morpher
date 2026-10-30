@@ -64,13 +64,15 @@ struct EditorTests final : juce::UnitTest
                 {
                     expect (! other.intersects (bezel), where + ": buttons overlap");
 
+                    // Measured edge to edge: halving an odd width to find a
+                    // centre would come out a point short.
                     const auto sameRow = other.getY() == bezel.getY();
                     const auto sameColumn = other.getX() == bezel.getX();
                     if (sameRow)
-                        expect (std::abs (other.getCentreX() - bezel.getCentreX()) * 2 >= other.getWidth() + bezel.getWidth() + 2 * theme::controlGap,
+                        expect (juce::jmax (other.getX() - bezel.getRight(), bezel.getX() - other.getRight()) >= theme::controlGap,
                                 where + ": " + b->getButtonText() + " is 12 from its neighbour");
                     if (sameColumn)
-                        expect (std::abs (other.getCentreY() - bezel.getCentreY()) * 2 >= other.getHeight() + bezel.getHeight() + 2 * theme::controlGap,
+                        expect (juce::jmax (other.getY() - bezel.getBottom(), bezel.getY() - other.getBottom()) >= theme::controlGap,
                                 where + ": " + b->getButtonText() + " is 12 below the one above");
                 }
 
